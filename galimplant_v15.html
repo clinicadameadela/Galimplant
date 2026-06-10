@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Gestão de Stock Galimplant & Cirurgias</title>
+ 
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <meta name="apple-mobile-web-app-title" content="Galimplant Stock">
+ <meta name="theme-color" content="#0c3c60">
+ 
+ <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkdlc3RhbyBkZSBTdG9jayBHYWxpbXBsYW50ICYgQ2lydXJnaWFzIiwKICAic2hvcnRfbmFtZSI6ICJHYWxpbXBsYW50U3RvY2siLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2Y0ZjZmOSIsCiAgInRoZW1lX2NvbG9yIjogIiMwYzNjNjAiCn0=">
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+ <style>
+ :root {
+ --primary: #0c3c60;
+ --secondary: #165a8c;
+ --accent: #e74c3c;
+ --warning: #f39c12;
+ --bg: #f4f6f9;
+ --card-bg: #ffffff;
+ --text: #333333;
+ }
+
+ body {
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: var(--bg);
+ color: var(--text);
+ margin: 0;
+ padding: 20px;
+ }
+
+ .container {
+ max-width: 1300px;
+ margin: 0 auto;
+ }
+
+ header {
+ background-color: var(--primary);
+ color: white;
+ padding: 15px 25px;
+ border-radius: 8px;
+ margin-bottom: 25px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+ }
+
+ .logo-container {
+ display: flex;
+ align-items: center;
+ gap: 15px;
+ }
+
+ .logo-svg {
+ width: 44px;
+ height: 44px;
+ }
+
+ .logo-text {
+ display: flex;
+ flex-direction: column;
+ }
+
+ .logo-main {
+ font-size: 20px;
+ font-weight: 700;
+ letter-spacing: -0.3px;
+ color: #ffffff;
+ line-height: 1.2;
+ }
+
+ .logo-sub {
+ font-size: 12px;
+ font-weight: 400;
+ color: #9bc2e6;
+ margin-top: 3px;
+ line-height: 1;
+ }
+
+ h2, h3 { margin: 0; }
+
+ .btn {
+ background-color: var(--secondary);
+ color: white;
+ border: none;
+ padding: 10px 18px;
+ border-radius: 4px;
+ cursor: pointer;
+ font-weight: bold;
+ transition: background 0.2s;
+ }
+
+ .btn:hover { background-color: #1d72b0; }
+ .btn-accent { background-color: var(--accent); }
+ .btn-accent:hover { background-color: #c0392b; }
+ .btn-success { background-color: #27ae60; }
+ .btn-success:hover { background-color: #219150; }
+ .btn-small { padding: 5px 10px; font-size: 0.85em; margin-top: 5px; }
+
+ .grid {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 25px;
+ }
+
+ @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+ .card {
+ background: var(--card-bg);
+ padding: 25px;
+ border-radius: 8px;
+ box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+ margin-bottom: 25px;
+ }
+
+ .card h2 {
+ color: var(--primary);
+ border-bottom: 2px solid #eee;
+ padding-bottom: 10px;
+ margin-bottom: 20px;
+ }
+
+ .form-group {
+ margin-bottom: 15px;
+ }
+
+ .form-row {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 15px;
+ margin-bottom: 15px;
+ }
+ 
+ .form-row-three {
+ display: grid;
+ grid-template-columns: 1fr 1fr 1fr;
+ gap: 10px;
+ margin-bottom: 15px;
+ }
+
+ label {
+ display: block;
+ margin-bottom: 5px;
+ font-weight: 600;
+ font-size: 0.9em;
+ }
+
+ input[type="text"], input[type="number"], input[type="date"], select, textarea {
+ width: 100%;
+ padding: 10px;
+ border: 1px solid #ccc;
+ border-radius: 4px;
+ box-sizing: border-box;
+ font-size: 0.95em;
+ font-family: inherit;
+ }
+
+ textarea { resize: vertical; height: 80px; }
+
+ .table-wrapper {
+ max-height: 500px;
+ overflow-y: auto;
+ border: 1px solid #ddd;
+ border-radius: 4px;
+ }
+
+ table {
+ width: 100%;
+ border-collapse: collapse;
+ }
+
+ th, td {
+ padding: 10px 12px;
+ text-align: left;
+ border-bottom: 1px solid #ddd;
+ font-size: 0.9em;
+ }
+
+ th {
+ background-color: #f8f9fa;
+ position: sticky;
+ top: 0;
+ color: var(--primary);
+ }
+
+ .stock-input {
+ width: 70px !important;
+ padding: 5px !important;
+ text-align: center;
+ }
+
+ .badge {
+ padding: 4px 8px;
+ border-radius: 4px;
+ font-weight: bold;
+ font-size: 0.85em;
+ display: inline-block;
+ }
+
+ .badge-danger { background-color: #fde8e8; color: var(--accent); }
+ .badge-warning { background-color: #fef3c7; color: var(--warning); }
+ .badge-success { background-color: #def7ec; color: #1e7e34; }
+
+ .history-item {
+ border-left: 4px solid var(--primary);
+ padding-left: 15px;
+ margin-bottom: 15px;
+ background: #f9f9f9;
+ padding: 10px;
+ border-radius: 0 4px 4px 0;
+ position: relative;
+ }
+ .editing-now {
+ border: 2px dashed var(--warning);
+ background-color: #fffdf5;
+ }
+ 
+ .dente-row {
+ background: #f8fafc;
+ border: 1px solid #e2e8f0;
+ padding: 15px;
+ border-radius: 6px;
+ margin-bottom: 12px;
+ position: relative;
+ }
+
+ .fase-box {
+ border: 1px solid #cbd5e1;
+ padding: 15px;
+ border-radius: 6px;
+ margin-bottom: 15px;
+ background: #fff;
+ }
+ .fase-box h4 {
+ margin-top: 0;
+ margin-bottom: 10px;
+ color: var(--secondary);
+ border-bottom: 1px dashed #cbd5e1;
+ padding-bottom: 4px;
+ }
+ 
+ .form-actions {
+ display: flex;
+ gap: 10px;
+ margin-top: 20px;
+ border-top: 2px solid #eee;
+ padding-top: 20px;
+ }
+ 
+ /* Per-dente phase rows in section 5&6 */
+ .dente-fase-row {
+ background: #f8fafc;
+ border: 1px solid #d4e3f0;
+ border-radius: 6px;
+ padding: 12px 14px;
+ margin-bottom: 10px;
+ }
+ .dente-fase-row .dente-label {
+ font-weight: 700;
+ color: var(--primary);
+ font-size: 0.9em;
+ margin-bottom: 8px;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ }
+ .dente-fase-row .form-row-fase {
+ display: grid;
+ grid-template-columns: 180px 1fr;
+ gap: 10px;
+ align-items: start;
+ }
+ .dente-fase-row input[type="date"] {
+ width: 100%;
+ }
+ .dente-fase-row textarea {
+ min-height: 60px;
+ resize: vertical;
+ }
+ @media (max-width: 600px) {
+ .dente-fase-row .form-row-fase {
+ grid-template-columns: 1fr;
+ }
+ }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+ <header>
+ <div class="logo-container">
+ <svg class="logo-svg" viewBox="0 0 100 100">
+ <rect x="38" y="10" width="24" height="24" rx="4" fill="#ffffff"/>
+ <rect x="10" y="38" width="24" height="24" rx="4" fill="#ffffff" opacity="0.85"/>
+ <rect x="66" y="38" width="24" height="24" rx="4" fill="#ffffff" opacity="0.85"/>
+ <rect x="38" y="66" width="24" height="24" rx="4" fill="#ffffff" opacity="0.7"/>
+ <circle cx="50" cy="50" r="10" fill="#0c3c60"/>
+ </svg>
+ <div class="logo-text">
+ <span class="logo-main">Clínica Médico-Dentária de Aver-o-Mar, Lda</span>
+ <span class="logo-sub">Diretor Clínico: Luís Zeferino (OMD 01162)</span>
+ </div>
+ </div>
+ <div>
+ <button class="btn btn-success" onclick="exportBackup()">Exportar Backup para Cloud</button>
+ <button class="btn" onclick="document.getElementById('importFile').click()">Importar Backup</button>
+ <input type="file" id="importFile" style="display:none" onchange="importBackup(event)">
+ </div>
+ </header>
+
+ <div class="grid">
+ <div class="card" id="formCard">
+ <h2 id="formTitle">Nova Ficha Cirúrgica & Planeamento</h2>
+ <form id="surgeryForm" onsubmit="preventNormalSubmit(event)">
+ <input type="hidden" id="editIndex" value="-1">
+ 
+ <h3>1. Identificação do Paciente</h3>
+ <div class="form-group">
+ <label for="pName">Nome Completo</label>
+ <input type="text" id="pName" required placeholder="Nome do paciente">
+ </div>
+ <div class="form-row">
+ <div>
+ <label for="pSex">Sexo</label>
+ <select id="pSex">
+ <option value="Masculino">Masculino</option>
+ <option value="Feminino">Feminino</option>
+ <option value="Não Informado">Não Informado</option>
+ </select>
+ </div>
+ <div>
+ <label for="pBirth">Data de Nascimento</label>
+ <input type="date" id="pBirth" required>
+ </div>
+ </div>
+ <div class="form-group">
+ <label for="pRiscos">Riscos Cirúrgicos (Medicamentos, Patologias, Alergias)</label>
+ <textarea id="pRiscos" placeholder="Ex: Toma Aspirina, Diabético Tipo II, Alergia à Penicilina..."></textarea>
+ </div>
+
+ <h3>2. Planeamento Clínico Geral</h3>
+ <div class="form-row">
+ <div>
+ <label for="pProsthesis">Tipo de Prótese / Coroa Final Planeada</label>
+ <input type="text" id="pProsthesis" required placeholder="Ex: Coroa Aparafusada Metal-Cerâmica">
+ </div>
+ </div>
+
+ <h3>3. Biomateriais & Enxerto</h3>
+ <div class="form-row">
+ <div>
+ <label for="pBone">Material Substituição Óssea (Marca)</label>
+ <input type="text" id="pBone" placeholder="Ex: Bio-Oss, Galimplant Bone">
+ </div>
+ <div>
+ <label for="pMembrane">Membrana Reabsorvível (Marca/Dimensões)</label>
+ <input type="text" id="pMembrane" placeholder="Ex: Evolution 20x30mm">
+ </div>
+ </div>
+
+ <h3>4. Componentes Galimplant por Dente/Zona (Múltiplos em Simultâneo)</h3>
+ <div id="dentesContainer">
+ </div>
+ <button type="button" class="btn btn-success" style="margin-bottom: 20px; width: 100%;" onclick="addDenteRow()">+ Adicionar Dente / Zona a Tratar</button>
+
+ <h3>5 e 6. Cronograma Clínico &amp; Observações por Fase</h3>
+
+ <div class="fase-box">
+ <h4>FASE 1: CIRURGIA IMPLANTAR</h4>
+ <div id="faseContainer_cir"></div>
+ </div>
+
+ <div class="fase-box">
+ <h4>FASE 2: AVALIAÇÃO / ABERTURA</h4>
+ <div id="faseContainer_reab"></div>
+ </div>
+
+ <div class="fase-box">
+ <h4>FASE 3: COLOCAÇÃO DE COROA / PRÓTESE</h4>
+ <div id="faseContainer_prost"></div>
+ </div>
+
+ <!-- hidden legacy fields kept for backwards compat with old saves -->
+ <input type="hidden" id="dateCir">
+ <input type="hidden" id="notesCir">
+ <input type="hidden" id="dateReab">
+ <input type="hidden" id="notesReab">
+ <input type="hidden" id="dateProst">
+ <input type="hidden" id="notesProst">
+
+ <div class="form-actions">
+ <button type="button" class="btn btn-success" style="flex: 2; padding: 12px;" onclick="saveFase('Ações Gerais')">Gravar Alterações à Ficha (Todas as Fases)</button>
+ <button type="button" id="cancelEditBtn" class="btn" style="display:none; background-color:#7f8c8d; flex: 1; padding: 12px;" onclick="cancelEditing()">Cancelar Edição / Fechar Reabertura</button>
+ </div>
+ </form>
+ </div>
+
+ <div>
+ <div class="card">
+ <h2>Inventário de Peças Galimplant</h2>
+ <div class="search-box">
+ <input type="text" id="searchStock" placeholder="Filtrar por referência ou descrição..." onkeyup="filterStockTable()">
+ </div>
+ <div class="table-wrapper">
+ <table>
+ <thead>
+ <tr>
+ <th>Referência</th>
+ <th>Descrição do Item</th>
+ <th>Qtd Stock</th>
+ <th>Estado</th>
+ </tr>
+ </thead>
+ <tbody id="stockTableBody">
+ </tbody>
+ </table>
+ </div>
+ <div style="margin-top: 15px; text-align: right;">
+ <button class="btn" onclick="saveStockToStorage()">Atualizar Valores de Stock Manuais</button>
+ </div>
+ </div>
+
+ <div class="card">
+ <h2>Histórico de Fichas Clínicas (Por Paciente)</h2>
+ 
+ <div class="search-box" style="background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 20px;">
+ <label style="margin-bottom: 8px; color: var(--primary);">🔎 Filtrar Fichas:</label>
+ <div class="form-row-three">
+ <input type="text" id="searchHistoryName" placeholder="Pesquisar por Nome..." onkeyup="filterHistory()">
+ <select id="searchHistorySex" onchange="filterHistory()">
+ <option value="">Todos os Sexos</option>
+ <option value="Masculino">Masculino</option>
+ <option value="Feminino">Feminino</option>
+ <option value="Não Informado">Não Informado</option>
+ </select>
+ <input type="date" id="searchHistoryDate" onchange="filterHistory()" title="Filtrar por data de cirurgia">
+ </div>
+ <div style="text-align: right; margin-top: 5px;">
+ <button class="btn btn-small" style="background:#7f8c8d;" onclick="clearHistoryFilters()">Limpar Filtros</button>
+ </div>
+ </div>
+
+ <div id="surgeryHistory">
+ <p style="color:#777; font-style:italic;">Utilize os filtros acima para pesquisar e exibir fichas clínicas.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<script>
+ const     catalogoInicial = {
+        // === IMPLANTES IPX - SISTEMA CLASSICO ===
+        "IPX 3508S": "Implante IPX Ø3.5 mm x 8 mm",
+        "IPX 3510S": "Implante IPX Ø3.5 mm x 10 mm",
+        "IPX 3512S": "Implante IPX Ø3.5 mm x 12 mm",
+        "IPX 3514S": "Implante IPX Ø3.5 mm x 14 mm",
+        "IPX 3516S": "Implante IPX Ø3.5 mm x 16 mm",
+        "IPX 3518S": "Implante IPX Ø3.5 mm x 18 mm",
+        "IPX 4006S": "Implante IPX Ø4.0 mm x 6 mm",
+        "IPX 4008S": "Implante IPX Ø4.0 mm x 8 mm",
+        "IPX 4010S": "Implante IPX Ø4.0 mm x 10 mm",
+        "IPX 4012S": "Implante IPX Ø4.0 mm x 12 mm",
+        "IPX 4014S": "Implante IPX Ø4.0 mm x 14 mm",
+        "IPX 4016S": "Implante IPX Ø4.0 mm x 16 mm",
+        "IPX 4018S": "Implante IPX Ø4.0 mm x 18 mm",
+        "IPX 4506S": "Implante IPX Ø4.5 mm x 6 mm",
+        "IPX 4508S": "Implante IPX Ø4.5 mm x 8 mm",
+        "IPX 4510S": "Implante IPX Ø4.5 mm x 10 mm",
+        "IPX 4512S": "Implante IPX Ø4.5 mm x 12 mm",
+        "IPX 4514S": "Implante IPX Ø4.5 mm x 14 mm",
+        "IPX 5006S": "Implante IPX Ø5.0 mm x 6 mm",
+        "IPX 5008S": "Implante IPX Ø5.0 mm x 8 mm",
+        "IPX 5010S": "Implante IPX Ø5.0 mm x 10 mm",
+        "IPX 5012S": "Implante IPX Ø5.0 mm x 12 mm",
+        // === IMPLANTES IPXC - CUBETA FECHADA ===
+        "IPXC 3508S": "Implante IPX Ø3.5 mm x 8 mm (Cubeta Fechada)",
+        "IPXC 3510S": "Implante IPX Ø3.5 mm x 10 mm (Cubeta Fechada)",
+        "IPXC 3512S": "Implante IPX Ø3.5 mm x 12 mm (Cubeta Fechada)",
+        "IPXC 3514S": "Implante IPX Ø3.5 mm x 14 mm (Cubeta Fechada)",
+        "IPXC 3516S": "Implante IPX Ø3.5 mm x 16 mm (Cubeta Fechada)",
+        "IPXC 3518S": "Implante IPX Ø3.5 mm x 18 mm (Cubeta Fechada)",
+        "IPXC 4006S": "Implante IPX Ø4.0 mm x 6 mm (Cubeta Fechada)",
+        "IPXC 4008S": "Implante IPX Ø4.0 mm x 8 mm (Cubeta Fechada)",
+        "IPXC 4010S": "Implante IPX Ø4.0 mm x 10 mm (Cubeta Fechada)",
+        "IPXC 4012S": "Implante IPX Ø4.0 mm x 12 mm (Cubeta Fechada)",
+        "IPXC 4014S": "Implante IPX Ø4.0 mm x 14 mm (Cubeta Fechada)",
+        "IPXC 4016S": "Implante IPX Ø4.0 mm x 16 mm (Cubeta Fechada)",
+        "IPXC 4018S": "Implante IPX Ø4.0 mm x 18 mm (Cubeta Fechada)",
+        "IPXC 4506S": "Implante IPX Ø4.5 mm x 6 mm (Cubeta Fechada)",
+        "IPXC 4508S": "Implante IPX Ø4.5 mm x 8 mm (Cubeta Fechada)",
+        "IPXC 4510S": "Implante IPX Ø4.5 mm x 10 mm (Cubeta Fechada)",
+        "IPXC 4512S": "Implante IPX Ø4.5 mm x 12 mm (Cubeta Fechada)",
+        "IPXC 4514S": "Implante IPX Ø4.5 mm x 14 mm (Cubeta Fechada)",
+        "IPXC 5006S": "Implante IPX Ø5.0 mm x 6 mm (Cubeta Fechada)",
+        "IPXC 5008S": "Implante IPX Ø5.0 mm x 8 mm (Cubeta Fechada)",
+        "IPXC 5010S": "Implante IPX Ø5.0 mm x 10 mm (Cubeta Fechada)",
+        "IPXC 5012S": "Implante IPX Ø5.0 mm x 12 mm (Cubeta Fechada)",
+        // === IMPLANTES ICI - SISTEMA CLASSICO ===
+        "ICI 03210S": "Implante ICI Ø3.2 mm x 10 mm",
+        "ICI 03212S": "Implante ICI Ø3.2 mm x 12 mm",
+        "ICI 03214S": "Implante ICI Ø3.2 mm x 14 mm",
+        "ICI 03508S": "Implante ICI Ø3.5 mm x 8 mm",
+        "ICI 03510S": "Implante ICI Ø3.5 mm x 10 mm",
+        "ICI 03512S": "Implante ICI Ø3.5 mm x 12 mm",
+        "ICI 03514S": "Implante ICI Ø3.5 mm x 14 mm",
+        "ICI 04008S": "Implante ICI Ø4.0 mm x 8 mm",
+        "ICI 04010S": "Implante ICI Ø4.0 mm x 10 mm",
+        "ICI 04012S": "Implante ICI Ø4.0 mm x 12 mm",
+        "ICI 04014S": "Implante ICI Ø4.0 mm x 14 mm",
+        "ICI 05008S": "Implante ICI Ø5.0 mm x 8 mm",
+        "ICI 05010S": "Implante ICI Ø5.0 mm x 10 mm",
+        "ICI 05012S": "Implante ICI Ø5.0 mm x 12 mm",
+        "ICI 05014S": "Implante ICI Ø5.0 mm x 14 mm",
+        // === IMPLANTES ICIC - CUBETA FECHADA ===
+        "ICIC 03210S": "Implante ICI Ø3.2 mm x 10 mm (Cubeta Fechada)",
+        "ICIC 03212S": "Implante ICI Ø3.2 mm x 12 mm (Cubeta Fechada)",
+        "ICIC 03214S": "Implante ICI Ø3.2 mm x 14 mm (Cubeta Fechada)",
+        "ICIC 03508S": "Implante ICI Ø3.5 mm x 8 mm (Cubeta Fechada)",
+        "ICIC 03510S": "Implante ICI Ø3.5 mm x 10 mm (Cubeta Fechada)",
+        "ICIC 03512S": "Implante ICI Ø3.5 mm x 12 mm (Cubeta Fechada)",
+        "ICIC 03514S": "Implante ICI Ø3.5 mm x 14 mm (Cubeta Fechada)",
+        "ICIC 04008S": "Implante ICI Ø4.0 mm x 8 mm (Cubeta Fechada)",
+        "ICIC 04010S": "Implante ICI Ø4.0 mm x 10 mm (Cubeta Fechada)",
+        "ICIC 04012S": "Implante ICI Ø4.0 mm x 12 mm (Cubeta Fechada)",
+        "ICIC 04014S": "Implante ICI Ø4.0 mm x 14 mm (Cubeta Fechada)",
+        "ICIC 05008S": "Implante ICI Ø5.0 mm x 8 mm (Cubeta Fechada)",
+        "ICIC 05010S": "Implante ICI Ø5.0 mm x 10 mm (Cubeta Fechada)",
+        "ICIC 05012S": "Implante ICI Ø5.0 mm x 12 mm (Cubeta Fechada)",
+        "ICIC 05014S": "Implante ICI Ø5.0 mm x 14 mm (Cubeta Fechada)",
+        // === IMPLANTES IPXC M2 - SISTEMA UNICO ===
+        "IPXC M2 4008S": "Implante Unico IPXC M2 Ø4.0 mm x 8 mm",
+        "IPXC M2 4010S": "Implante Unico IPXC M2 Ø4.0 mm x 10 mm",
+        "IPXC M2 4012S": "Implante Unico IPXC M2 Ø4.0 mm x 12 mm",
+        "IPXC M2 4014S": "Implante Unico IPXC M2 Ø4.0 mm x 14 mm",
+        "IPXC M2 4016S": "Implante Unico IPXC M2 Ø4.0 mm x 16 mm",
+        "IPXC M2 4018S": "Implante Unico IPXC M2 Ø4.0 mm x 18 mm",
+        "IPXC M2 4508S": "Implante Unico IPXC M2 Ø4.5 mm x 8 mm",
+        "IPXC M2 4510S": "Implante Unico IPXC M2 Ø4.5 mm x 10 mm",
+        "IPXC M2 4512S": "Implante Unico IPXC M2 Ø4.5 mm x 12 mm",
+        "IPXC M2 4514S": "Implante Unico IPXC M2 Ø4.5 mm x 14 mm",
+        "IPXC M2 5008S": "Implante Unico IPXC M2 Ø5.0 mm x 8 mm",
+        "IPXC M2 5010S": "Implante Unico IPXC M2 Ø5.0 mm x 10 mm",
+        "IPXC M2 5012S": "Implante Unico IPXC M2 Ø5.0 mm x 12 mm",
+        // === IMPLANTES ICIC M2 - SISTEMA UNICO ===
+        "ICIC M2 04008S": "Implante Unico ICIC M2 Ø4.0 mm x 8 mm",
+        "ICIC M2 04010S": "Implante Unico ICIC M2 Ø4.0 mm x 10 mm",
+        "ICIC M2 04012S": "Implante Unico ICIC M2 Ø4.0 mm x 12 mm",
+        "ICIC M2 04014S": "Implante Unico ICIC M2 Ø4.0 mm x 14 mm",
+        "ICIC M2 05008S": "Implante Unico ICIC M2 Ø5.0 mm x 8 mm",
+        "ICIC M2 05010S": "Implante Unico ICIC M2 Ø5.0 mm x 10 mm",
+        "ICIC M2 05012S": "Implante Unico ICIC M2 Ø5.0 mm x 12 mm",
+        "ICIC M2 05014S": "Implante Unico ICIC M2 Ø5.0 mm x 14 mm",
+        // === PILARES MUSR - MULTIPLO PLAT 3.8 ===
+        "MUSR 04010": "Pilar Multi-posicao Recto Estrecho H1mm (Plat 3.8 - Multiplo)",
+        "MUSR 04020": "Pilar Multi-posicao Recto Estrecho H2mm (Plat 3.8 - Multiplo)",
+        "MUSR 04030": "Pilar Multi-posicao Recto Estrecho H3mm (Plat 3.8 - Multiplo)",
+        "MUSR 04040": "Pilar Multi-posicao Recto Estrecho H4mm (Plat 3.8 - Multiplo)",
+        "MUSR 04050": "Pilar Multi-posicao Recto Estrecho H5mm (Plat 3.8 - Multiplo)",
+        "MUSR 05020": "Pilar Multi-posicao Recto Ancho H2mm (Plat 4.8 - Multiplo)",
+        "MUSR 05030": "Pilar Multi-posicao Recto Ancho H3mm (Plat 4.8 - Multiplo)",
+        "MUSR 05040": "Pilar Multi-posicao Recto Ancho H4mm (Plat 4.8 - Multiplo)",
+        "MUSR 05050": "Pilar Multi-posicao Recto Ancho H5mm (Plat 4.8 - Multiplo)",
+        // === PILARES MUSLAR - SLIM MULTIPLO PLAT 3.8 ===
+        "MUSLAR 04020": "Pilar Multi-posicao Recto Slim H2mm (Plat 3.8 - Multiplo)",
+        "MUSLAR 04030": "Pilar Multi-posicao Recto Slim H3mm (Plat 3.8 - Multiplo)",
+        "MUSLAR 04040": "Pilar Multi-posicao Recto Slim H4mm (Plat 3.8 - Multiplo)",
+        "MUSLAR 04050": "Pilar Multi-posicao Recto Slim H5mm (Plat 3.8 - Multiplo)",
+        // === PILARES MUSR - MULTIPLO PLAT 4.8 ANCHO ===
+        // === PILARES MUSA - UNITARIO PLAT 3.8 ===
+        "MUSA S04010": "Pilar Multi-posicao Recto Estrecho H1mm (Plat 3.8 - Unitario)",
+        "MUSA S04020": "Pilar Multi-posicao Recto Estrecho H2mm (Plat 3.8 - Unitario)",
+        "MUSA S04030": "Pilar Multi-posicao Recto Estrecho H3mm (Plat 3.8 - Unitario)",
+        "MUSA S04040": "Pilar Multi-posicao Recto Estrecho H4mm (Plat 3.8 - Unitario)",
+        "MUSA S04050": "Pilar Multi-posicao Recto Estrecho H5mm (Plat 3.8 - Unitario)",
+        // === PILARES MUSLA - SLIM UNITARIO PLAT 3.8 ===
+        "MUSLA 04020": "Pilar Multi-posicao Recto Slim H2mm (Plat 3.8 - Unitario)",
+        "MUSLA 04030": "Pilar Multi-posicao Recto Slim H3mm (Plat 3.8 - Unitario)",
+        "MUSLA 04040": "Pilar Multi-posicao Recto Slim H4mm (Plat 3.8 - Unitario)",
+        "MUSLA 04050": "Pilar Multi-posicao Recto Slim H5mm (Plat 3.8 - Unitario)",
+        // === PILARES MUSR M2 - MULTIPLO PLAT 4.8 ===
+        "MUSR M2 05020": "Pilar Multi-posicao Recto Estetico M2 H2mm (Plat 4.8 - Multiplo)",
+        "MUSR M2 05030": "Pilar Multi-posicao Recto Estetico M2 H3mm (Plat 4.8 - Multiplo)",
+        "MUSR M2 05040": "Pilar Multi-posicao Recto Estetico M2 H4mm (Plat 4.8 - Multiplo)",
+        "MUSR M2 05050": "Pilar Multi-posicao Recto Estetico M2 H5mm (Plat 4.8 - Multiplo)",
+        // === PILARES MUSA M2 - UNITARIO PLAT 4.8 ===
+        "MUSA M2 05020": "Pilar Multi-posicao Recto Estetico M2 H2mm (Plat 4.8 - Unitario)",
+        "MUSA M2 05030": "Pilar Multi-posicao Recto Estetico M2 H3mm (Plat 4.8 - Unitario)",
+        "MUSA M2 05040": "Pilar Multi-posicao Recto Estetico M2 H4mm (Plat 4.8 - Unitario)",
+        "MUSA M2 05050": "Pilar Multi-posicao Recto Estetico M2 H5mm (Plat 4.8 - Unitario)",
+        // === PILARES MUST - SISTEMA UNICO RECTO ===
+        "MUST 04010": "Pilar Multi-posicao Unico Recto H1mm",
+        "MUST 04020": "Pilar Multi-posicao Unico Recto H2mm",
+        "MUST 04030": "Pilar Multi-posicao Unico Recto H3mm",
+        // === PILARES MUSTE M2 - TRANSFORMAVEL EXTERNA ===
+        "MUSTE M2 04010": "Pilar Multi-posicao Transformavel Externa M2 H1mm (Plat 3.8)",
+        "MUSTE M2 04020": "Pilar Multi-posicao Transformavel Externa M2 H2mm (Plat 3.8)",
+        "MUSTE M2 04030": "Pilar Multi-posicao Transformavel Externa M2 H3mm (Plat 3.8)",
+        "MUSTE M2 04040": "Pilar Multi-posicao Transformavel Externa M2 H4mm (Plat 3.8)",
+        // === PILARES EMU - ANGULADOS ===
+        "EMU 1504030": "Pilar Multi-posicao Angulado 15deg H3mm",
+        "EMU 1504040": "Pilar Multi-posicao Angulado 15deg H4mm",
+        "EMU 1504050": "Pilar Multi-posicao Angulado 15deg H5mm",
+        "EMU 3004030": "Pilar Multi-posicao Angulado 30deg H3mm",
+        "EMU 3004040": "Pilar Multi-posicao Angulado 30deg H4mm",
+        "EMU 3004050": "Pilar Multi-posicao Angulado 30deg H5mm",
+        "EMU 4504050": "Pilar Multi-posicao Angulado 45deg H5mm",
+        "EMU 5004050": "Pilar Multi-posicao Angulado 50deg H5mm",
+        "EMU 6004050": "Pilar Multi-posicao Angulado 60deg H5mm",
+        // === PILARES DIRECTO A IMPLANTE - CIMENTADOS ===
+        "PA 0154010": "Pilar Angulado para Cimentar 15deg H1mm",
+        "PA 0154030": "Pilar Angulado para Cimentar 15deg H3mm",
+        "PA 0154050": "Pilar Angulado para Cimentar 15deg H5mm",
+        "PA 0304010": "Pilar Angulado para Cimentar 30deg H1mm",
+        "PA 0304030": "Pilar Angulado para Cimentar 30deg H3mm",
+        "PA 0304050": "Pilar Angulado para Cimentar 30deg H5mm",
+        "PA 04000": "Pilar Recto Anti-rotacional para Cimentar H0mm",
+        "PA 04010": "Pilar Recto Anti-rotacional para Cimentar H1mm",
+        "PA 04030": "Pilar Recto Anti-rotacional para Cimentar H3mm",
+        "PA 04050": "Pilar Recto Anti-rotacional para Cimentar H5mm",
+        "PCERC 04020": "Interfase Compativel Sistema CEREC H2mm",
+        "PCERC 04030": "Interfase Compativel Sistema CEREC H3mm",
+        "PCERC 04040": "Interfase Compativel Sistema CEREC H4mm",
+        "PCERCMUA 40": "Interfase Ceramica Unitario (Plat 3.8)",
+        "PCERCMUA 4040": "Interfase Ceramica Unitario Diam4.0mm H4mm",
+        "PCERCMUR 40": "Interfase Ceramica Multiplo (Plat 3.8)",
+        "PEA DP04020": "Pilar Angulavel H2mm",
+        "PEA DP04030": "Pilar Angulavel H3mm",
+        "PEA DP04040": "Pilar Angulavel H4mm",
+        "PGZA 04010": "Base para Protese Cemento-Atornillada H1mm",
+        "PGZA 04020": "Base para Protese Cemento-Atornillada H2mm",
+        "PGZA 040207": "Base para Protese Cemento-Atornillada (7graus) H2mm",
+        "PGZA 04030": "Base para Protese Cemento-Atornillada H3mm",
+        "PGZA 040307": "Base para Protese Cemento-Atornillada (7graus) H3mm",
+        "PGZA 04040": "Base para Protese Cemento-Atornillada H4mm",
+        "PGZA 040407": "Base para Protese Cemento-Atornillada (7graus) H4mm",
+        "PGZA 040507": "Base para Protese Cemento-Atornillada (7graus) H5mm",
+        "PR 04000": "Pilar Recto Rotacional para Cimentar H2mm",
+        // === PILARES REAB. MEDIATA / IMEDIATA ===
+        "PCCS 04040": "Pilar Recto Conico Reab. Mediata H4mm",
+        "PCCS 04060": "Pilar Recto Conico Reab. Mediata H6mm",
+        "PCIA 04010": "Pilar Recto Anti-rotacional Reab. Imediata H1mm",
+        "PCIA 04020": "Pilar Recto Anti-rotacional Reab. Imediata H2mm",
+        "PCIA 04030": "Pilar Recto Anti-rotacional Reab. Imediata H3mm",
+        "PCIA 04040": "Pilar Recto Anti-rotacional Reab. Imediata H4mm",
+        "PCIR 040": "Pilar Recto Rotacional Reab. Imediata H1mm",
+        "PCS 04010": "Pilar Recto Reab. Mediata H1mm",
+        "PCS 04020": "Pilar Recto Reab. Mediata H2mm",
+        "PCS 04040": "Pilar Recto Reab. Mediata H4mm",
+        "PCS 04060": "Pilar Recto Reab. Mediata H6mm",
+        // === PILARES OVERDENT / BOLA ===
+        "PKB 04008": "Pilar de Bola H 0.8mm",
+        "PKB 04016": "Pilar de Bola H 1.6mm",
+        "PKB 04030": "Pilar de Bola H 3mm",
+        "PKB 04040": "Pilar de Bola H 4mm",
+        "PKB 04050": "Pilar de Bola H 5mm",
+        "PKO 04008": "Pilar Overdent H 0.8mm",
+        "PKO 04016": "Pilar Overdent H 1.6mm",
+        "PKO 04030": "Pilar Overdent H 3mm",
+        "PKO 04040": "Pilar Overdent H 4mm",
+        "PKO 04050": "Pilar Overdent H 5mm",
+        "PKO 04070": "Pilar Overdent H 7mm",
+        // === TAMPAS DE CICATRIZACAO ===
+        "EPCTA 4844": "Tampa de Cicatrizacao Estetica Diam4.8mm",
+        "EPCTA 5044": "Tampa de Cicatrizacao Estetica M2 Diam5.0mm",
+        "EPCTEA 4844": "Tampa de Cicatrizacao Transformavel Estetica Diam4.8mm",
+        "EPCTER 4844": "Tampa de Cicatrizacao Transformavel Reta Diam4.8mm",
+        "EPCTR 4030": "Tampa de Cicatrizacao Reta Diam4.0mm H3mm",
+        "EPCTR 4844": "Tampa de Cicatrizacao Reta Diam4.8mm H4mm",
+        "EPCTR 5044": "Tampa de Cicatrizacao Reta Diam5.0mm H4mm",
+        "PCM 4830": "Tampa de Cicatrizacao Unico Diam4.8mm H3mm",
+        "PCMUTR 40": "Interfase de Carga Imediata Sistema Unico",
+        "PCT 4030": "Tampa de Cicatrizacao Diam4.0mm H3mm (Carga Imediata)",
+        "PCT 4830": "Tampa de Cicatrizacao Diam4.8mm H3mm (Carga Imediata)",
+        "PCT 5030": "Tampa de Cicatrizacao Diam5.0mm H3mm (Carga Imediata)",
+        // === INTERFASES / PILAR CERAMICO ===
+        "PGZMUA 4040": "Interfase Base Carga Imediata Unitario",
+        "PGZMUR 40": "Interfase Base Carga Imediata Multiplo",
+        "PITEMUA DA4040": "Interfase Activa de Cimentacao Unitario H4.0mm",
+        "PITEMUA DA4075": "Interfase Activa de Cimentacao Unitario H7.5mm",
+        "PITEMUA DA5040": "Interfase Activa de Cimentacao Unitario M2 H4.0mm",
+        "PITEMUA DA5075": "Interfase Activa de Cimentacao Unitario M2 H7.5mm",
+        "PITEMUA DAE5040": "Interfase Activa Transformavel Externa H4.0mm",
+        "PITEMUR 4040": "Interfase Activa Multiplo H4.0mm (Plat 3.8)",
+        "PITEMUR DA4040": "Interfase Activa de Cimentacao Multiplo H4.0mm",
+        "PITEMUR DA4075": "Interfase Activa de Cimentacao Multiplo H7.5mm",
+        "PITEMUR DA5040": "Interfase Activa de Cimentacao Multiplo M2 H4.0mm",
+        "PITEMUR DA5075": "Interfase Activa de Cimentacao Multiplo M2 H7.5mm",
+        "PITEMUR DAE4075": "Interfase Activa Transformavel Externa H7.5mm",
+        "PITEMUTR DA4040": "Interfase Unico Activa de Cimentacao H4.0mm",
+        "PITEMUTR DA4075": "Interfase Unico Activa de Cimentacao H7.5mm",
+        "PTEMUTR DA4040": "Interfase Angulavel Unico H4.0mm",
+        // === TORNILHOS / PARAFUSOS ===
+        "TMU 4048": "Tornilho de Montagem Universal Diam4.0mm",
+        "TMUT 40": "Tornilho de Montagem Sistema Unico",
+        "TP 040": "Tornilho de Protese Directo a Implante",
+        "TPEA DP040": "Tornilho de Protese Pilar Angulavel",
+        "TRD": "Tornilho para Modelo 3D (Replica - Lab)",
+        // === CARGA IMEDIATA ===
+        "PTIMUA 4048": "Tornilho de Carga Imediata Unitario",
+        "PTIMUR 4048": "Tornilho de Carga Imediata Multiplo",
+        "PTIMUTR 40": "Tornilho de Carga Imediata Sistema Unico",
+        // === IMPRESSAO ANALOGICA ===
+        "AIP 040": "Tornilho Impressao Analogico Cubeta Aberta",
+        "AIP 40T": "Tornilho Impressao Analogico Transformavel",
+        "AIPC 040": "Tornilho Impressao Analogico Cubeta Fechada",
+        "AIPMU 40": "Tornilho Impressao Analogico Sistema Unico Diam4.0mm",
+        "AIPT 40": "Tornilho Impressao Analogico Unitario Diam4.0mm",
+        "AIPT 50": "Tornilho Impressao Analogico Unitario M2 Diam5.0mm",
+        "AIPTR 40": "Tornilho Impressao Analogico Multiplo Diam4.0mm",
+        "AIPTR 50": "Tornilho Impressao Analogico Multiplo M2 Diam5.0mm",
+        "TAIP 0135": "Tornilho Impressao Analogico Directo Implante 135mm",
+        "TAIP 0200": "Tornilho Impressao Analogico Directo Implante 200mm",
+        "TAIP 135": "Tornilho Impressao Analogico Plataforma Estreita 135mm",
+        "TAIP 200": "Tornilho Impressao Analogico Plataforma Ancha 200mm",
+        "TAIPMU 135": "Tornilho Impressao Analogico Sistema Unico 135mm",
+        // === SCAN BODY DIGITAL ===
+        "ESBT MUSR": "Scan Body Digital Multiplo (Plat 3.8)",
+        "SBT 040": "Scan Body Digital Directo a Implante",
+        "SBT 40": "Scan Body Digital Transformavel",
+        "SBT MUSA": "Scan Body Digital Unitario (Plat 3.8)",
+        "SBT MUSA 50": "Scan Body Digital Unitario M2 Diam5.0mm",
+        "SBT MUSR": "Scan Body Digital Multiplo (Plat 3.8)",
+        "SBT MUSR 50": "Scan Body Digital Multiplo M2 Diam5.0mm",
+        "SBT MUST": "Scan Body Digital Sistema Unico",
+        "TPIA DP4048": "Scan Body Digital / Tornilho Impressao Digital",
+        // === REPLICAS / ANALOGOS ===
+        "RI SB 040": "Replica Analogica Directo a Implante",
+        "RI SB 40E": "Replica Analogica Transformavel Externa",
+        "RIMA SB 40": "Replica Analogica Sistema Unico",
+        "RIT SB 40": "Replica Analogica Unitario Plat 3.8",
+        "RIT SB 50": "Replica Analogica Unitario M2 Plat 4.8",
+        "RITR SB 40": "Replica Analogica Multiplo Plat 3.8",
+        "RITR SB 50": "Replica Analogica Multiplo M2 Plat 4.8",
+        // === COMPONENTES OVERDENT / BOLA ===
+        "AKO 4048": "Analogo Overdent",
+        "OB 4048": "Analogo Pilar de Bola",
+        "PKOC 08": "Tampa de Retencao Overdent",
+        "RKO 4048": "Retenedor Overdent",
+        "TKB 4048": "Tornilho Pilar de Bola",
+        "TKO 4048": "Tornilho Pilar Overdent",
+        // === CHAVES / LLAVES ===
+        "DC 144": "Dado Curto para Portaimplantes (Carraca) 14.4mm",
+        "DL 244": "Dado Longo para Portaimplantes (Carraca) 24.4mm",
+        "DMA 150": "Dado Manual para Portaimplantes 15mm",
+        "LLCA 097": "Chave Ultracurta para Carraca 9.7mm",
+        "LLCAC 160": "Chave Protetica (Destornilhador Manual) 16mm",
+        "LLCAC 250": "Chave Protetica (Destornilhador Manual) 25mm",
+        "LLCAI 220": "Chave Carraca Directa a Implante 22mm",
+        "LLCAI 290": "Chave Carraca Directa a Implante 29mm",
+        "LLCAMU 174": "Chave Protetica Multi-posicao 17.4mm",
+        "LLCAMU 244": "Chave Protetica Multi-posicao 24.4mm",
+        "LLDC 174": "Chave Dual (Manual/Carraca) 17.4mm",
+        "LLDC 220": "Chave Dual (Manual/Carraca) 22mm",
+        "LLDL 290": "Chave Dual (Manual/Carraca) 29mm",
+        "LLDP 220": "Chave para Sistema Angulavel 22mm",
+        "LLDP 290": "Chave para Sistema Angulavel 29mm",
+        "LLKOD 250": "Chave Overdent Directa 25mm",
+        "LLM 215": "Chave Motor para Insercao do Implante 21.5mm",
+        "LLMC 220": "Chave Manual c/ Corona Giratoria 22mm",
+        "LLMI 295": "Chave Motor Directa a Implante 29.5mm",
+        "LLML 290": "Chave Manual c/ Corona Giratoria 29mm",
+        "LLMTP 220": "Chave Protetica de Motor 22mm",
+        "LLMTP 290": "Chave Protetica de Motor 29mm"
+    };
+
+ let CurrentStock = {};
+ let SurgeriesLog = [];
+ let denteCounter = 0;
+
+ window.addEventListener('DOMContentLoaded', () => {
+ const savedStock = localStorage.getItem('galimplant_stock_v3');
+ const savedSurgeries = localStorage.getItem('galimplant_surgeries_v3');
+
+ // Inicializar TODAS as referencias do catalogo a 0
+ Object.keys(catalogoInicial).forEach(k => { CurrentStock[k] = 0; });
+ // Restaurar stock guardado preservando valores existentes
+ if (savedStock) {
+  const saved = JSON.parse(savedStock);
+  Object.keys(saved).forEach(ref => {
+   if (catalogoInicial[ref] !== undefined) CurrentStock[ref] = saved[ref];
+  });
+ }
+
+ if (savedSurgeries) {
+ SurgeriesLog = JSON.parse(savedSurgeries);
+ }
+
+ renderStockTable();
+ filterHistory();
+ addDenteRow(); // also calls renderFaseContainers
+ });
+
+ function preventNormalSubmit(e) {
+ e.preventDefault();
+ }
+
+ // ── Phase containers: one date+notes row per dente ──────────────────────────
+ function renderFaseContainers() {
+  const rows = document.querySelectorAll('.dente-row');
+  ['cir', 'reab', 'prost'].forEach(faseKey => {
+   const container = document.getElementById('faseContainer_' + faseKey);
+   if (!container) return;
+   const labels = { cir: 'Data da Cirurgia', reab: 'Data de Avaliação / Reabertura', prost: 'Data da Colocação da Prótese' };
+   const notesLabels = { cir: 'Notas / Intercorrências da Cirurgia', reab: 'Notas de Reabertura / Cicatrização', prost: 'Notas da Prótese / Ajustes Oclusais' };
+   const placeholders = { cir: 'Evolução e observações da cirurgia...', reab: 'Evolução e observações da reabertura...', prost: 'Detalhes finais da reabilitação...' };
+   // Save existing values
+   const saved = {};
+   container.querySelectorAll('.fase-dente-entry').forEach(el => {
+    saved[el.dataset.denteKey] = { date: el.querySelector('.fase-date').value, notes: el.querySelector('.fase-notes').value };
+   });
+   container.innerHTML = '';
+   rows.forEach((row, i) => {
+    const denteId = row.querySelector('.dente-id') ? row.querySelector('.dente-id').value.trim() : ('Zona ' + (i+1));
+    const key = row.id || ('d' + i);
+    const savedVals = saved[key] || (i === 0 ? (saved['_single'] || {}) : {});
+    container.appendChild(buildFaseRow(faseKey, denteId, labels[faseKey], notesLabels[faseKey], placeholders[faseKey], savedVals, key));
+   });
+  });
+ }
+
+ function buildFaseRow(faseKey, denteId, dateLabel, notesLabel, placeholder, savedVals, denteKey) {
+  const dk = denteKey || '_single';
+  const div = document.createElement('div');
+  div.className = 'dente-fase-row fase-dente-entry';
+  div.dataset.denteKey = dk;
+  div.dataset.denteId = denteId || '';
+  div.dataset.faseKey = faseKey;
+  const labelHtml = denteId ? ('<div class="dente-label"><span>&#129463;</span> Dente / Zona: <strong>' + denteId + '</strong></div>') : '';
+  div.innerHTML = labelHtml +
+   '<div class="form-row-fase">' +
+    '<div class="form-group" style="margin-bottom:0;">' +
+     '<label>' + dateLabel + '</label>' +
+     '<input type="date" class="fase-date"' + (savedVals.date ? ' value="' + savedVals.date + '"' : '') + '>' +
+    '</div>' +
+    '<div class="form-group" style="margin-bottom:0;">' +
+     '<label>' + notesLabel + '</label>' +
+     '<textarea class="fase-notes" placeholder="' + placeholder + '">' + (savedVals.notes ? savedVals.notes.replace(/</g,'&lt;').replace(/>/g,'&gt;') : '') + '</textarea>' +
+    '</div>' +
+   '</div>';
+  return div;
+ }
+
+ function getFaseData() {
+  const result = {};
+  ['cir', 'reab', 'prost'].forEach(faseKey => {
+   const container = document.getElementById('faseContainer_' + faseKey);
+   if (!container) return;
+   const entries = container.querySelectorAll('.fase-dente-entry');
+   const perDente = [];
+   entries.forEach(el => {
+    perDente.push({ denteKey: el.dataset.denteKey, denteId: el.dataset.denteId || '', date: el.querySelector('.fase-date').value, notes: el.querySelector('.fase-notes').value });
+   });
+   result['date_' + faseKey] = perDente.length > 0 ? perDente[0].date : '';
+   result['notes_' + faseKey] = perDente.map(e => { const label = e.denteId || e.denteKey; return (label ? '[' + label + '] ' : '') + e.notes; }).filter(Boolean).join(' | ');
+   result['perDente_' + faseKey] = perDente.length > 0 ? perDente : null;
+  });
+  return result;
+ }
+
+ function restoreFaseContainers(ficha) {
+  ['cir', 'reab', 'prost'].forEach(faseKey => {
+   const container = document.getElementById('faseContainer_' + faseKey);
+   if (!container) return;
+   const entries = container.querySelectorAll('.fase-dente-entry');
+   const legacyDate = { cir: ficha.dataCir, reab: ficha.dataReab, prost: ficha.dataProst };
+   const legacyNotes = { cir: ficha.notesCir, reab: ficha.notesReab, prost: ficha.notesProst };
+   const perDenteData = ficha['perDente_' + faseKey];
+   if (perDenteData && perDenteData.length > 0) {
+    const lookup = {};
+    perDenteData.forEach(e => { lookup[e.denteKey] = e; });
+    entries.forEach(el => {
+     const e = lookup[el.dataset.denteKey] || lookup['_single'] || {};
+     if (e.date) el.querySelector('.fase-date').value = e.date;
+     if (e.notes) el.querySelector('.fase-notes').value = e.notes;
+    });
+   } else {
+    const date = ficha['date_' + faseKey] || legacyDate[faseKey] || '';
+    const notes = ficha['notes_' + faseKey] || legacyNotes[faseKey] || '';
+    entries.forEach(el => {
+     el.querySelector('.fase-date').value = date;
+     el.querySelector('.fase-notes').value = notes;
+    });
+   }
+  });
+ }
+
+
+
+ function addDenteRow(dadosPreCarregados = null) {
+ denteCounter++;
+ const container = document.getElementById('dentesContainer');
+ const idFila = `dente_row_${denteCounter}`;
+
+ let optionsImplantes = '<option value="">-- Seleccionar Implante --</option>';
+ let optionsPilares = '<option value="">-- Seleccionar Pilar / Transepitelial --</option>';
+ let optionsOutros = '<option value="">-- Nenhum / Opcional --</option>';
+
+ Object.keys(catalogoInicial).forEach(ref => {
+ const desc = `${ref} - ${catalogoInicial[ref]}`;
+ if (ref.startsWith('IPX') || ref.startsWith('ICI')) {
+ optionsImplantes += `<option value="${ref}">${desc}</option>`;
+ } else if (ref.startsWith('MUS') || ref.startsWith('EMU')) {
+ optionsPilares += `<option value="${ref}">${desc}</option>`;
+ } else {
+ optionsOutros += `<option value="${ref}">${desc}</option>`;
+ }
+ });
+
+ const rowHTML = `
+ <div class="dente-row" id="${idFila}">
+ <div class="form-row-three">
+ <div>
+ <label>Identificação do Dente / Zona</label>
+ <input type="text" class="dente-id" placeholder="Ex: 16 ou 24" value="${dadosPreCarregados ? dadosPreCarregados.dente : ''}" required oninput="renderFaseContainers()">
+ </div>
+ <div>
+ <label>Implante Galimplant</label>
+ <select class="dente-implante" onchange="checkStockAlert(this.value)">${optionsImplantes}</select>
+ </div>
+ <div>
+ <label>Pilar / Transepitelial / Angulado</label>
+ <select class="dente-pilar" onchange="checkStockAlert(this.value)">${optionsPilares}</select>
+ <button type="button" class="btn btn-small btn-accent" style="width: 100%; margin-top: 10px;" onclick="removeDenteRow('${idFila}')">✕ Remover Dente</button>
+ </div>
+ </div>
+ <div class="form-group" style="margin-bottom:0;">
+ <label>Componente Adicional (Chaves, Tampas ou Digital/Lab)</label>
+ <select class="dente-outro" onchange="checkStockAlert(this.value)">${optionsOutros}</select>
+ </div>
+ </div>
+ `;
+
+ container.appendChild(document.createRange().createContextualFragment(rowHTML));
+
+ if(dadosPreCarregados) {
+ const f = document.getElementById(idFila);
+ f.querySelector('.dente-implante').value = dadosPreCarregados.implante || '';
+ f.querySelector('.dente-pilar').value = dadosPreCarregados.pilar || '';
+ f.querySelector('.dente-outro').value = dadosPreCarregados.outro || '';
+ }
+
+ renderFaseContainers();
+ }
+
+ function removeDenteRow(idFila) {
+ const el = document.getElementById(idFila);
+ if(el) el.remove();
+ renderFaseContainers();
+ }
+
+ function getDentesFormValues() {
+ const rows = document.querySelectorAll('.dente-row');
+ let list = [];
+ rows.forEach(r => {
+ const dente = r.querySelector('.dente-id').value.trim();
+ const implante = r.querySelector('.dente-implante').value;
+ const pilar = r.querySelector('.dente-pilar').value;
+ const outro = r.querySelector('.dente-outro').value;
+ if(dente) {
+ list.push({ dente, implante, pilar, outro });
+ }
+ });
+ return list;
+ }
+
+ function saveFase(contexto) {
+ const pName = document.getElementById('pName').value.trim();
+ if (!pName) {
+ alert("Por favor, introduza o Nome Completo do Paciente antes de gravar.");
+ return;
+ }
+
+ const editIndex = parseInt(document.getElementById('editIndex').value);
+ const listaDentes = getDentesFormValues();
+
+ if (editIndex === -1) {
+ if (listaDentes.length === 0) {
+ alert("⚠️ Alerta: Deve associar pelo menos 1 dente ou zona para processar a cirurgia e o abate de stock.");
+ return;
+ }
+ 
+ for(let d of listaDentes) {
+ if(!d.implante || !d.pilar) {
+ alert(`Por favor, selecione o Implante e Pilar para o dente ${d.dente}.`);
+ return;
+ }
+ let pecas = [d.implante, d.pilar];
+ if(d.outro) pecas.push(d.outro);
+ 
+ for(let p of pecas) {
+ if((CurrentStock[p] || 0) <= 0) {
+ alert(`❌ Erro Fatal: Falta absoluta de stock para a peça Galimplant: ${p}. Não é possível abater.`);
+ return;
+ }
+ }
+ }
+
+ let avisos = [];
+ listaDentes.forEach(d => {
+ CurrentStock[d.implante]--;
+ CurrentStock[d.pilar]--;
+ if(d.outro) CurrentStock[d.outro]--;
+
+ if(CurrentStock[d.implante] <= 2) avisos.push(`- ${d.implante} (${CurrentStock[d.implante]} restas)`);
+ if(CurrentStock[d.pilar] <= 2) avisos.push(`- ${d.pilar} (${CurrentStock[d.pilar]} restas)`);
+ });
+ if(avisos.length > 0) {
+ alert(`⚠️ Stock Crítico detetado nas seguintes referências:\n${avisos.join('\n')}`);
+ }
+ localStorage.setItem('galimplant_stock_v3', JSON.stringify(CurrentStock));
+ renderStockTable();
+ }
+
+ const faseData = getFaseData();
+ const dadosFicha = {
+ paciente: pName,
+ sexo: document.getElementById('pSex').value,
+ dataNasc: document.getElementById('pBirth').value,
+ risks: document.getElementById('pRiscos').value,
+ protese: document.getElementById('pProsthesis').value,
+ osso: document.getElementById('pBone').value || 'Não utilizado',
+ membrana: document.getElementById('pMembrane').value || 'Não utilizada',
+ dentesTratados: listaDentes,
+ 
+ dataCir: faseData.date_cir || '',
+ notesCir: faseData.notes_cir || '',
+ perDente_cir: faseData.perDente_cir || null,
+
+ dataReab: faseData.date_reab || '',
+ notesReab: faseData.notes_reab || '',
+ perDente_reab: faseData.perDente_reab || null,
+
+ dataProst: faseData.date_prost || '',
+ notesProst: faseData.notes_prost || '',
+ perDente_prost: faseData.perDente_prost || null,
+
+ ultimaFaseGuardada: editIndex === -1 ? 'Cirurgia (Nova)' : 'Edição Geral',
+ dataAlteracao: new Date().toLocaleDateString('pt-PT')
+ };
+
+ if (editIndex === -1) {
+ SurgeriesLog.unshift(dadosFicha);
+ localStorage.setItem('galimplant_surgeries_v3', JSON.stringify(SurgeriesLog));
+ alert(`✓ Nova ficha clínica criada e gravada com sucesso localmente!`);
+ } else {
+ SurgeriesLog[editIndex] = dadosFicha;
+ localStorage.setItem('galimplant_surgeries_v3', JSON.stringify(SurgeriesLog));
+ alert(`✓ Alterações à ficha clínica gravadas com sucesso localmente!`);
+ }
+
+ renderHistory();
+ cancelEditing();
+ }
+
+ function generatePDFFromHistory(index) {
+ const ficha = SurgeriesLog[index];
+ const { jsPDF } = window.jspdf;
+ const doc = new jsPDF();
+
+ // Cabeçalho do PDF Seguro - Sem funções instáveis como roundRect
+ doc.setFillColor(12, 60, 96);
+ doc.rect(0, 0, 220, 25, 'F');
+ 
+ // Renderização estável do símbolo gráfico da Galimplant
+ doc.setFillColor(255, 255, 255);
+ doc.rect(15, 5, 5, 5, 'F');
+ doc.rect(9, 11, 5, 5, 'F');
+ doc.rect(21, 11, 5, 5, 'F');
+ doc.rect(15, 17, 5, 5, 'F');
+ doc.setFillColor(12, 60, 96);
+ doc.circle(17.5, 13.5, 2, 'F');
+
+ doc.setTextColor(255, 255, 255);
+ doc.setFont("Helvetica", "bold");
+ doc.setFontSize(11);
+ doc.text("Clínica Médico-Dentária de Aver-o-Mar, Lda", 30, 11);
+ doc.setFontSize(8);
+ doc.setFont("Helvetica", "normal");
+ doc.setTextColor(155, 194, 230);
+ doc.text("Diretor Clínico: Luís Zeferino (OMD 01162)", 30, 17);
+
+ doc.setTextColor(51, 51, 51);
+ doc.setFontSize(12);
+ doc.setFont("Helvetica", "bold");
+ doc.text(`FICHA CLÍNICA CONSOLIDADA - ESTADO ACTUAL`, 15, 36);
+ doc.setFont("Helvetica", "normal");
+ doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-PT')}`, 140, 36);
+
+ doc.setDrawColor(200, 200, 200);
+ doc.line(15, 40, 195, 40);
+
+ doc.setFont("Helvetica", "bold");
+ doc.text("1. IDENTIFICAÇÃO DO PACIENTE", 15, 48);
+ doc.setFont("Helvetica", "normal");
+ doc.text(`Nome Completo: ${ficha.paciente}`, 15, 55);
+ doc.text(`Sexo: ${ficha.sexo}   |   Idade: ${calculateAge(ficha.dataNasc)} (${formatDate(ficha.dataNasc)})`, 15, 62);
+ doc.text(`Riscos Médicos/Alergias: ${ficha.risks || 'Nenhum registado'}`, 15, 69);
+
+ doc.setFont("Helvetica", "bold");
+ doc.text("2. PLANEAMENTO DE BIOMATERIAIS", 15, 79);
+ doc.setFont("Helvetica", "normal");
+ doc.text(`Substituição Óssea: ${ficha.osso}`, 15, 86);
+ doc.text(`Membrana Reabsorvível: ${ficha.membrana}`, 15, 93);
+ doc.text(`Tipo de Prótese Final Planeada: ${ficha.protese}`, 15, 100);
+
+ doc.setFont("Helvetica", "bold");
+ doc.text("3. COMPONENTES E IMPLANTES GALIMPLANT UTILIZADOS", 15, 110);
+ 
+ let yPos = 117;
+ doc.setFontSize(10);
+ doc.setFont("Helvetica", "bold");
+ doc.text("Dente/Zona", 15, yPos);
+ doc.text("Implante", 45, yPos);
+ doc.text("Pilar / Transepitelial", 95, yPos);
+ doc.text("Componentes Adicionais", 150, yPos);
+ doc.setFont("Helvetica", "normal");
+ 
+ doc.line(15, yPos + 2, 195, yPos + 2);
+ yPos += 8;
+
+ ficha.dentesTratados.forEach(d => {
+ doc.text(`${d.dente}`, 15, yPos);
+ doc.text(`${d.implante}`, 45, yPos);
+ doc.text(`${d.pilar}`, 95, yPos);
+ doc.text(`${d.outro || 'Nenhum'}`, 150, yPos);
+ yPos += 7;
+ });
+
+ yPos += 5;
+ doc.setFontSize(12);
+ doc.setFont("Helvetica", "bold");
+ doc.text("4. LINHA TEMPORAL E EVOLUÇÕES CLÍNICAS REGISTADAS", 15, yPos);
+ doc.setFont("Helvetica", "normal");
+ yPos += 8;
+
+ // Helper: render one phase in PDF (handles single or multi-dente)
+    const denteMap = {};
+    if (ficha.dentesTratados) ficha.dentesTratados.forEach((d, i) => { denteMap['dente_row_' + (i+1)] = d.dente; denteMap['_single'] = d.dente; });
+    const renderFasePDF = (label, flatDate, flatNotes, perDente) => {
+      if (yPos > 260) { doc.addPage(); yPos = 20; }
+      doc.setFont("Helvetica", "bold"); doc.text(label, 15, yPos); doc.setFont("Helvetica", "normal");
+      if (perDente && perDente.length >= 1) {
+        yPos += 6;
+        perDente.forEach(e => {
+          if (yPos > 270) { doc.addPage(); yPos = 20; }
+          const nome = (e.denteId && e.denteId !== '') ? e.denteId : (denteMap[e.denteKey] || '');
+          const prefix = nome ? ('Dente ' + nome + ': ') : '';
+          doc.text('  ' + prefix + formatDate(e.date), 15, yPos); yPos += 5;
+          if (e.notes) {
+            const ns = doc.splitTextToSize('  Notas: ' + e.notes, 175);
+            doc.text(ns, 15, yPos); yPos += ns.length * 5;
+          }
+          yPos += 2;
+        });
+      } else {
+        doc.text('Data: ' + formatDate(flatDate), 55, yPos); yPos += 6;
+        const ns = doc.splitTextToSize('Notas: ' + (flatNotes || 'Sem anotações.'), 180);
+        doc.text(ns, 15, yPos); yPos += (ns.length * 5) + 4;
+      }
+    };
+    renderFasePDF("Fase 1: Cirurgia", ficha.dataCir, ficha.notesCir, ficha.perDente_cir);
+    renderFasePDF("Fase 2: Abertura", ficha.dataReab, ficha.notesReab, ficha.perDente_reab);
+    renderFasePDF("Fase 3: Prótese", ficha.dataProst, ficha.notesProst, ficha.perDente_prost);
+
+ yPos += 35;
+ if (yPos > 270) { doc.addPage(); yPos = 30; }
+ doc.setFontSize(10);
+ doc.text("Assinatura e Carimbo da Direção Clínica:", 15, yPos);
+ doc.line(15, yPos + 8, 90, yPos + 8);
+
+ const safeName = ficha.paciente.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+ doc.save(`Ficha_Clinica_${safeName}_completa.pdf`);
+ }
+
+ function deleteSurgeryFromHistory(index) {
+ const ficha = SurgeriesLog[index];
+ const confirmarAviso = confirm(`⚠️ AVISO DE SEGURANÇA CLÍNICA:\n\nEstá prestes a ELIMINAR PERMANENTEMENTE a ficha clínica completa do(a) paciente: "${ficha.paciente}".\n\nEsta ação vai apagar todo o cronograma, múltiplos dentes planeados e registos associados. Pretende continuar?`);
+ 
+ if (confirmarAviso) {
+ SurgeriesLog.splice(index, 1);
+ localStorage.setItem('galimplant_surgeries_v3', JSON.stringify(SurgeriesLog));
+ alert("✓ Ficha clínica removida com sucesso do sistema.");
+ cancelEditing();
+ }
+ }
+
+ function openForEditing(index) {
+ const c = SurgeriesLog[index];
+ document.getElementById('editIndex').value = index;
+ document.getElementById('formTitle').textContent = `Continuar / Editar Ficha`;
+ 
+ document.getElementById('pName').value = c.paciente;
+ document.getElementById('pSex').value = c.sexo;
+ document.getElementById('pBirth').value = c.dataNasc;
+ document.getElementById('pRiscos').value = c.risks || '';
+ document.getElementById('pProsthesis').value = c.protese || '';
+ document.getElementById('pBone').value = c.osso || '';
+ document.getElementById('pMembrane').value = c.membrana || '';
+
+ document.getElementById('dentesContainer').innerHTML = '';
+ if (c.dentesTratados && c.dentesTratados.length > 0) {
+ c.dentesTratados.forEach(d => addDenteRow(d));
+ } else {
+ addDenteRow();
+ }
+
+ restoreFaseContainers(c);
+
+ document.getElementById('cancelEditBtn').style.display = "block";
+ document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+ 
+ filterHistory();
+ const divItem = document.getElementById(`hist_item_${index}`);
+ if (divItem) divItem.className += " editing-now";
+ }
+
+ function cancelEditing() {
+ document.getElementById('editIndex').value = "-1";
+ document.getElementById('formTitle').textContent = `Nova Ficha Cirúrgica & Planeamento`;
+ document.getElementById('cancelEditBtn').style.display = "none";
+ document.getElementById('surgeryForm').reset();
+ document.getElementById('dentesContainer').innerHTML = '';
+ addDenteRow(); // also calls renderFaseContainers
+ clearHistoryFilters();
+ }
+
+ function renderStockTable() {
+ const tbody = document.getElementById('stockTableBody');
+ tbody.innerHTML = '';
+ Object.keys(catalogoInicial).forEach(ref => {
+ const qtd = CurrentStock[ref] || 0;
+ let statusBadge = '';
+ if (qtd === 0) {
+ statusBadge = '<span class="badge badge-danger">Sem Stock</span>';
+ } else if (qtd <= 2) {
+ statusBadge = '<span class="badge badge-warning">Stock Crítico (≤2)</span>';
+ } else {
+ statusBadge = '<span class="badge badge-success">Disponível</span>';
+ }
+ const row = `
+ <tr class="item-row">
+ <td><strong>${ref}</strong></td>
+ <td>${catalogoInicial[ref]}</td>
+ <td>
+ <input type="number" class="stock-input" id="input_st_${ref}" value="${qtd}" min="0" onchange="updateSingleStock('${ref}', this.value)">
+ </td>
+ <td>${statusBadge}</td>
+ </tr>
+ `;
+ tbody.insertAdjacentHTML('beforeend', row);
+ });
+ }
+
+ function updateSingleStock(ref, val) {
+ CurrentStock[ref] = parseInt(val) || 0;
+ localStorage.setItem('galimplant_stock_v3', JSON.stringify(CurrentStock));
+ renderStockTable();
+ }
+
+ function saveStockToStorage() {
+ Object.keys(catalogoInicial).forEach(ref => {
+ const inputVal = document.getElementById(`input_st_${ref}`).value;
+ CurrentStock[ref] = parseInt(inputVal) || 0;
+ });
+ localStorage.setItem('galimplant_stock_v3', JSON.stringify(CurrentStock));
+ renderStockTable();
+ alert("Stock físico Galimplant updated manualmente com sucesso!");
+ }
+
+ function checkStockAlert(ref) {
+ if(!ref) return;
+ const currentQtd = CurrentStock[ref] || 0;
+ if(currentQtd === 0) {
+ alert(`⚠️ Alerta Crítico: A referência [${ref}] está sem stock no consultório.`);
+ }
+ }
+
+ function calculateAge(dateString) {
+ if(!dateString) return "";
+ const today = new Date();
+ const birthDate = new Date(dateString);
+ let age = today.getFullYear() - birthDate.getFullYear();
+ const m = today.getMonth() - birthDate.getMonth();
+ if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+ age--;
+ }
+ return age >= 0 ? age + " anos" : "";
+ }
+
+ function formatDate(dateString) {
+ if(!dateString) return "Não agendada";
+ const parts = dateString.split("-");
+ if(parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+ return dateString;
+ }
+
+ function buildFaseHistHTML(label, flatDate, flatNotes, perDente, denteMap) {
+  if (perDente && perDente.length >= 1) {
+   let html = '<strong>' + label + ':</strong><br>';
+   perDente.forEach(e => {
+    let nome = e.denteId && e.denteId !== '' ? e.denteId : (denteMap && denteMap[e.denteKey] ? denteMap[e.denteKey] : '');
+    const prefix = nome ? ('<em>Dente ' + nome + '</em> ') : '';
+    html += '&nbsp;&nbsp;' + prefix + formatDate(e.date) + (e.notes ? (' — <em>' + e.notes + '</em>') : '') + '<br>';
+   });
+   return html;
+  }
+  return '<strong>' + label + ':</strong> ' + formatDate(flatDate) + ' — <em>' + (flatNotes || 'Sem notas.') + '</em><br>';
+ }
+
+ function filterHistory() {
+ const nameQ = document.getElementById('searchHistoryName').value.toLowerCase().trim();
+ const sexQ = document.getElementById('searchHistorySex').value;
+ const dateQ = document.getElementById('searchHistoryDate').value;
+ const editIndex = parseInt(document.getElementById('editIndex').value);
+
+ const histDiv = document.getElementById('surgeryHistory');
+ histDiv.innerHTML = '';
+
+ if (!nameQ && !sexQ && !dateQ && editIndex === -1) {
+ histDiv.innerHTML = '<p style="color:#777; font-style:italic;">Utilize os filtros acima para pesquisar e exibir fichas clínicas.</p>';
+ return;
+ }
+
+ let resultadosEncontrados = 0;
+
+ SurgeriesLog.forEach((c, index) => {
+ let matches = true;
+ if (nameQ && !c.paciente.toLowerCase().includes(nameQ)) matches = false;
+ if (sexQ && c.sexo !== sexQ) matches = false;
+ if (dateQ && c.dataCir !== dateQ) matches = false;
+ 
+ if (editIndex === index) matches = true;
+
+ if (matches) {
+ resultadosEncontrados++;
+ let dentesHTML = '';
+ if(c.dentesTratados && c.dentesTratados.length > 0) {
+ c.dentesTratados.forEach(d => {
+ dentesHTML += `<li>Dente <strong>${d.dente}</strong>: Implante: <span class="badge badge-success">${d.implante}</span> | Pilar: <span class="badge badge-warning">${d.pilar}</span> ${d.outro ? `| Adic: <span class="badge badge-success">${d.outro}</span>` : ''}</li>`;
+ });
+ } else {
+ dentesHTML = '<li>Nenhum componente individual registado nesta ficha.</li>';
+ }
+
+ const itemHTML = `
+ <div class="history-item" id="hist_item_${index}">
+ <div style="position: absolute; right: 10px; top: 10px; display: flex; gap: 5px;">
+  <button class="btn btn-small btn-success" onclick="openForEditing(${index})">🛠️ Reabrir</button>
+  <button class="btn btn-small" style="background:#2980b9;" onclick="generatePDFFromHistory(${index})">📄 PDF</button>
+  <button class="btn btn-small btn-accent" onclick="deleteSurgeryFromHistory(${index})">❌ Eliminar</button>
+ </div>
+ <strong>Paciente:</strong> ${c.paciente} (${calculateAge(c.dataNasc)})<br>
+ <strong>Riscos:</strong> <span style="color:var(--accent); font-weight:bold;">${c.risks || 'Nenhum'}</span><br>
+ <strong>Biomateriais:</strong> Ósseo: ${c.osso} | Membrana: ${c.membrana}<br>
+ <strong>Última Fase Atualizada:</strong> <span class="badge badge-warning">${c.ultimaFaseGuardada || 'Cirurgia'}</span>
+ 
+ <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.9em;">
+ ${dentesHTML}
+ </ul>
+
+ <div style="margin-top: 8px; font-size:0.85em; background: #fff; padding: 8px; border-radius: 4px; border:1px solid #ddd;">
+ <strong>⏱️ Linha Temporal e Evoluções Clínicas:</strong><br>
+ ${(() => {
+   const dm = {};
+   if (c.dentesTratados) c.dentesTratados.forEach((d, i) => { dm['dente_row_' + (i+1)] = d.dente; dm['_single'] = d.dente; });
+   return buildFaseHistHTML('📅 Cirurgia', c.dataCir, c.notesCir, c.perDente_cir, dm)
+        + buildFaseHistHTML('📅 Abertura', c.dataReab, c.notesReab, c.perDente_reab, dm)
+        + buildFaseHistHTML('📅 Prótese', c.dataProst, c.notesProst, c.perDente_prost, dm);
+ })()}
+ </div>
+ </div>
+ `;
+ histDiv.insertAdjacentHTML('beforeend', itemHTML);
+ }
+ });
+
+ if (resultadosEncontrados === 0 && (nameQ || sexQ || dateQ)) {
+ histDiv.innerHTML = '<p style="color:var(--accent); font-style:italic;">Nenhum paciente encontrado com os critérios introduzidos.</p>';
+ }
+ }
+
+ function clearHistoryFilters() {
+ document.getElementById('searchHistoryName').value = '';
+ document.getElementById('searchHistorySex').value = '';
+ document.getElementById('searchHistoryDate').value = '';
+ filterHistory();
+ }
+
+ function filterStockTable() {
+ const q = document.getElementById('searchStock').value.toLowerCase();
+ const rows = document.querySelectorAll('.item-row');
+ rows.forEach(row => {
+ const txt = row.textContent.toLowerCase();
+ row.style.display = txt.includes(q) ? '' : 'none';
+ });
+ }
+
+ function exportBackup() {
+ const backupDados = { stock: CurrentStock, historico: SurgeriesLog };
+ const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupDados));
+ const downloadAnchor = document.createElement('a');
+ downloadAnchor.setAttribute("href", dataStr);
+ downloadAnchor.setAttribute("download", "backup_galimplant_zeferino.json");
+ document.body.appendChild(downloadAnchor);
+ downloadAnchor.click();
+ downloadAnchor.remove();
+ }
+
+ function importBackup(event) {
+ const input = event.target;
+ const reader = new FileReader();
+ reader.onload = function() {
+ try {
+ const dadosCarregados = JSON.parse(reader.result);
+ if(dadosCarregados.stock && dadosCarregados.historico) {
+ CurrentStock = dadosCarregados.stock;
+ SurgeriesLog = dadosCarregados.historico;
+ localStorage.setItem('galimplant_stock_v3', JSON.stringify(CurrentStock));
+ localStorage.setItem('galimplant_surgeries_v3', JSON.stringify(SurgeriesLog));
+ renderStockTable();
+ filterHistory();
+ alert("✓ Cópia de segurança restaurada com sucesso!");
+ } else {
+ alert("Ficheiro inválido. Estrutura de dados corrompida.");
+ }
+ } catch (e) {
+ alert("Erro ao ler o ficheiro de backup.");
+ }
+ };
+ reader.readAsText(input.files[0]);
+ }
+</script>
+</body>
+</html>
